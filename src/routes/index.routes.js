@@ -1,5 +1,5 @@
 import { Router } from "express";
-import emocoesRoutes from "./candidatos.routes.js";
+import candidatosRoutes from "./candidatos.routes.js";
 
 const routes = Router();
 
