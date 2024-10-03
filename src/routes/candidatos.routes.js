@@ -4,7 +4,7 @@ const candidatosRoutes = Router()
 
 let candidatos = [
     {
-        id: Math.random() * 1000000,
+        id: Math.floor(Math.random() * 1000000),
         nome: 'Capitâ Lucimara',
         partido: 'PSD',
         idade: 39,
@@ -17,7 +17,7 @@ let candidatos = [
     },
     
     {
-        id: Math.random() * 1000000,
+        id: Math.floor(Math.random() * 1000000),
         nome: 'Franklin',
         partido: 'PL',
         idade: 48,
@@ -30,7 +30,7 @@ let candidatos = [
     },
 
     {
-        id: Math.random() * 1000000,
+        id: Math.floor(Math.random() * 1000000),
         nome: 'Alécio Cau',
         partido: 'PSB',
         idade: 38,
@@ -52,16 +52,11 @@ candidatosRoutes.get("/", (req, res) => {
 // Criar um novo candidato
 
 candidatosRoutes.post("/", (req, res) => {
-    if(idade < 18) {
-        return res.status(200).send({
-            message: 'candidato menor de idade'
-        })
-    }
-    
-    else {
-        const{ nome, cor } = req.body
-        const novocandidato = {
-        id: candidatos.length + 1,
+    // Validação dos campos de nome e idade
+
+    const{ nome, partido, idade, segundoMandato, proposta } = req.body
+        const novoCandidato = {
+        id: Math.floor(Math.random() * 1000000),
         nome: nome,
         partido: partido,
         idade: idade,
@@ -69,12 +64,24 @@ candidatosRoutes.post("/", (req, res) => {
         proposta: proposta
     }
 
-        candidatos.push(novocandidato)
-        return res.status(201)
-        .send( candidatos ) 
+    if (!nome || !idade) {
+        return res.status(400).send({
+            message: 'O Nome ou o Partido não foi preenchido'
+        })
+    }
+
+    if(idade < 18) {
+        return res.status(400).send({
+            message: 'Candidato menor de idade'
+        })
     }
     
-})
+    candidatos.push(novoCandidato)
+        return res.status(201)
+        .json( novoCandidato )
+
+    })
+
 
 // Rota para buscar um candidato pelo id
 candidatosRoutes.get("/:id", (req, res) => {
@@ -84,12 +91,12 @@ candidatosRoutes.get("/:id", (req, res) => {
 
     if(!candidato) {
         return res.status(404).send({
-            message: "candidato não encontrada!"
+            message: "Candidato não Encontrado!"
         });
     }
 
     return res.status(200).send({
-        message: "candidato encontrada!",
+        message: "Candidato Encontrado!",
         candidato,
     });
 })
@@ -101,28 +108,32 @@ candidatosRoutes.put('/:id', (req, res) => {
 
     if(!candidato) {
         return res.status(404).send({
-            message: 'candidato não encontrada!'
+            message: 'Candidato não Encontrado!'
         });
     }
 
-    if(idade < 18) {
-        return res.status(200).send({
-            message: 'candidato menor de idade'
-        })
-    } else {
-        const{ nome, cor } = req.body
+    const{ nome, partido, idade, segundoMandato, proposta } = req.body
         candidato.nome = nome;
-        candidato.cor = cor;
+        candidato.partido = partido;
+        candidato.idade = idade;
+        candidato.segundoMandato = segundoMandato;
+        candidato.proposta = proposta;
 
-        return res.status(200).send({
-        message: 'candidato Atualizada!',
-        candidato,
-    })
+    if(idade < 18) {
+        return res.status(400).send({
+            message: 'Candidato menor de idade'
+        })
     }
 
-    
+    else {
+        return res.status(201).send({
+            message: 'Candidato Atualizado!'
+        })
+    }
 
 })
+
+
 
 candidatosRoutes.delete('/:id', (req, res) => {
     const { id } = req.params;
@@ -131,15 +142,14 @@ candidatosRoutes.delete('/:id', (req, res) => {
 
     if(!candidato) {
         return res.status(404).send({
-            message: "candidato não encontrada!"
+            message: "Candidato não Encontrado!"
         });
     }
 
     candidatos = candidatos.filter((candidate) => candidate.id != id)
 
     return res.status(200).send({
-        message: 'candidato Deletada!',
-        candidato,
+        message: 'Candidato Deletado!',
     })
 })
 
